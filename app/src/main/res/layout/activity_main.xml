@@ -23,21 +23,21 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="4dp"
-            app:srcCompat="@android:drawable/ic_menu_favorite" />
+            app:srcCompat="@drawable/money_bag" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/main_IMG_heart1"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="4dp"
-            app:srcCompat="@android:drawable/ic_menu_favorite" />
+            app:srcCompat="@drawable/money_bag" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/main_IMG_heart2"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="4dp"
-            app:srcCompat="@android:drawable/ic_menu_favorite" />
+            app:srcCompat="@drawable/money_bag" />
     </LinearLayout><!-- Obstacles (Placeholders) -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_obstacle0"
