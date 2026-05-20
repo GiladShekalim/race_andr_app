@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
+    tools:context=".MainActivity">
+
+    <!-- Hearts (Lives) -->
+    <LinearLayout
+        android:id="@+id/main_LAY_hearts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_IMG_heart0"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="4dp"
+            app:srcCompat="@android:drawable/ic_menu_favorite" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_IMG_heart1"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="4dp"
+            app:srcCompat="@android:drawable/ic_menu_favorite" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_IMG_heart2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="4dp"
+            app:srcCompat="@android:drawable/ic_menu_favorite" />
+    </LinearLayout>
+
+    <!-- Obstacles (Placeholders) -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/main_IMG_obstacle0"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        app:srcCompat="@android:drawable/ic_delete" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/main_IMG_obstacle1"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="200dp"
+        android:layout_marginEnd="50dp"
+        app:srcCompat="@android:drawable/ic_delete" />
+
+    <!-- Car (Player) -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/main_IMG_car"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dp"
+        app:srcCompat="@android:drawable/ic_menu_directions" />
+
+    <!-- Control Buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/main_BTN_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="16dp"
+        android:text="LEFT" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/main_BTN_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:text="RIGHT" />
+
+</RelativeLayout>
