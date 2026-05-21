@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night Colors -->
+    <color name="background_color">#121212</color>
+    <color name="road_color">#222222</color>
+    <color name="heart_color">#81C784</color>
+</resources>

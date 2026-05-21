@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/darker_gray"
+    android:background="@color/background_color"
     tools:context=".MainActivity">
 
     <!-- Hearts (Lives) -->
@@ -15,42 +15,44 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/heart_top_margin"
         android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/main_IMG_heart0"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/heart_size"
+            android:layout_height="@dimen/heart_size"
+            android:layout_margin="@dimen/heart_margin"
             app:srcCompat="@drawable/money_bag" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/main_IMG_heart1"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/heart_size"
+            android:layout_height="@dimen/heart_size"
+            android:layout_margin="@dimen/heart_margin"
             app:srcCompat="@drawable/money_bag" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/main_IMG_heart2"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="4dp"
+            android:layout_width="@dimen/heart_size"
+            android:layout_height="@dimen/heart_size"
+            android:layout_margin="@dimen/heart_margin"
             app:srcCompat="@drawable/money_bag" />
-    </LinearLayout><!-- Obstacles (Placeholders) -->
+    </LinearLayout>
+
+    <!-- Obstacles (Placeholders) -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_obstacle0"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/obstacle_size"
+        android:layout_height="@dimen/obstacle_size"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
         app:srcCompat="@drawable/fuel" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_obstacle1"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/obstacle_size"
+        android:layout_height="@dimen/obstacle_size"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="200dp"
         android:layout_marginEnd="50dp"
@@ -58,8 +60,8 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_obstacle2"
-        android:layout_width="68dp"
-        android:layout_height="67dp"
+        android:layout_width="@dimen/obstacle_size"
+        android:layout_height="@dimen/obstacle_size"
         android:layout_alignParentStart="true"
         android:layout_marginStart="40dp"
         android:layout_marginTop="300dp"
@@ -67,47 +69,29 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_obstacle3"
-        android:layout_width="74dp"
-        android:layout_height="70dp"
+        android:layout_width="@dimen/obstacle_size"
+        android:layout_height="@dimen/obstacle_size"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="450dp"
         app:srcCompat="@drawable/broken_car" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_obstacle4"
-        android:layout_width="68dp"
-        android:layout_height="63dp"
+        android:layout_width="@dimen/obstacle_size"
+        android:layout_height="@dimen/obstacle_size"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="550dp"
         android:layout_marginEnd="32dp"
         app:srcCompat="@drawable/bankrupt" />
 
-    <!-- Obstacles (Placeholders) -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/main_IMG_obstacle0"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        app:srcCompat="@drawable/fuel" />
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/main_IMG_obstacle1"
-        android:layout_width="65dp"
-        android:layout_height="59dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="200dp"
-        android:layout_marginEnd="44dp"
-        app:srcCompat="@drawable/clinic" />
-
     <!-- Car (Player) -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_IMG_car"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="@dimen/car_size"
+        android:layout_height="@dimen/car_size"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="@dimen/car_bottom_margin"
         app:srcCompat="@drawable/racing_car" />
 
     <!-- Control Buttons -->
@@ -117,7 +101,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/default_margin"
         android:text="LEFT"
         app:icon="@drawable/ic_left" />
 
@@ -127,7 +111,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/default_margin"
         android:text="RIGHT"
         app:icon="@drawable/ic_right" />
 
