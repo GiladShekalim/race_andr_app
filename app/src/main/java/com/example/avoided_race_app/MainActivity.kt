@@ -10,36 +10,33 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 
 class MainActivity : AppCompatActivity() {
 
-    // 1. State Variables
-    private var currentLane = 1 // 0 = Left, 1 = Center, 2 = Right
-    private var currentObstacleRow = -1 // -1 means no obstacle is visible yet
+    // 1. Logic Manager (SOLID: Separate Logic from UI)
+    private lateinit var logicManager: LogicManager
+    private val ROWS = 7
+    private val COLS = 3
 
-    // 2. UI Components - Buttons
+    // 2. State Variables
+    private var currentCarLane = 1 // 0 = Left, 1 = Center, 2 = Right
+
+    // 3. UI Components
     private lateinit var main_BTN_left: ExtendedFloatingActionButton
     private lateinit var main_BTN_right: ExtendedFloatingActionButton
     
-    // 3. UI Components - Cars
-    private lateinit var main_IMG_car_0: AppCompatImageView
-    private lateinit var main_IMG_car_1: AppCompatImageView
-    private lateinit var main_IMG_car_2: AppCompatImageView
+    private lateinit var carImages: Array<AppCompatImageView>
+    
+    // Matrix of ImageViews to match our logic grid
+    private lateinit var obstacleMatrix: Array<Array<AppCompatImageView>>
 
-    // 4. UI Components - Obstacles (Left Lane only for Phase 3)
-    private lateinit var main_IMG_obstacle_0_0: AppCompatImageView
-    private lateinit var main_IMG_obstacle_1_0: AppCompatImageView
-    private lateinit var main_IMG_obstacle_2_0: AppCompatImageView
-    private lateinit var main_IMG_obstacle_3_0: AppCompatImageView
-    private lateinit var main_IMG_obstacle_4_0: AppCompatImageView
-    private lateinit var main_IMG_obstacle_5_0: AppCompatImageView
-    private lateinit var main_IMG_obstacle_6_0: AppCompatImageView
-
-    // 5. Timer Components
+    // 4. Timer Components
     private val handler = Handler(Looper.getMainLooper())
-    private val DELAY = 1000L // 1 second
+    private val DELAY = 500L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        logicManager = LogicManager(ROWS, COLS)
+        
         findViews()
         initViews()
         startTimer()
@@ -49,103 +46,68 @@ class MainActivity : AppCompatActivity() {
         main_BTN_left = findViewById(R.id.main_BTN_left)
         main_BTN_right = findViewById(R.id.main_BTN_right)
 
-        main_IMG_car_0 = findViewById(R.id.main_IMG_car_0)
-        main_IMG_car_1 = findViewById(R.id.main_IMG_car_1)
-        main_IMG_car_2 = findViewById(R.id.main_IMG_car_2)
+        // Find Car Images
+        carImages = arrayOf(
+            findViewById(R.id.main_IMG_car_0),
+            findViewById(R.id.main_IMG_car_1),
+            findViewById(R.id.main_IMG_car_2)
+        )
 
-        main_IMG_obstacle_0_0 = findViewById(R.id.main_IMG_obstacle_0_0)
-        main_IMG_obstacle_1_0 = findViewById(R.id.main_IMG_obstacle_1_0)
-        main_IMG_obstacle_2_0 = findViewById(R.id.main_IMG_obstacle_2_0)
-        main_IMG_obstacle_3_0 = findViewById(R.id.main_IMG_obstacle_3_0)
-        main_IMG_obstacle_4_0 = findViewById(R.id.main_IMG_obstacle_4_0)
-        main_IMG_obstacle_5_0 = findViewById(R.id.main_IMG_obstacle_5_0)
-        main_IMG_obstacle_6_0 = findViewById(R.id.main_IMG_obstacle_6_0)
+        // Initialize the 2D Array for Obstacles
+        obstacleMatrix = Array(ROWS) { r ->
+            Array(COLS) { c ->
+                val id = resources.getIdentifier("main_IMG_obstacle_${r}_${c}", "id", packageName)
+                findViewById(id)
+            }
+        }
     }
 
     private fun initViews() {
         main_BTN_left.setOnClickListener {
-            if (currentLane > 0) {
-                currentLane--
-                updateCarUI()
+            if (currentCarLane > 0) {
+                currentCarLane--
+                refreshUI()
             }
         }
 
         main_BTN_right.setOnClickListener {
-            if (currentLane < 2) {
-                currentLane++
-                updateCarUI()
+            if (currentCarLane < 2) {
+                currentCarLane++
+                refreshUI()
             }
         }
     }
 
-    private fun updateCarUI() {
-        main_IMG_car_0.visibility = View.INVISIBLE
-        main_IMG_car_1.visibility = View.INVISIBLE
-        main_IMG_car_2.visibility = View.INVISIBLE
-
-        if (currentLane == 0) {
-            main_IMG_car_0.visibility = View.VISIBLE
-        } else if (currentLane == 1) {
-            main_IMG_car_1.visibility = View.VISIBLE
-        } else if (currentLane == 2) {
-            main_IMG_car_2.visibility = View.VISIBLE
-        }
-    }
-
-    /**
-     * Starts the game loop
-     */
     private fun startTimer() {
         handler.postDelayed(object : Runnable {
             override fun run() {
-                moveObstacleDown()
-                handler.postDelayed(this, DELAY) // Repeat every 1 second
+                logicManager.tick()
+                refreshUI()
+                handler.postDelayed(this, DELAY)
             }
         }, DELAY)
     }
 
     /**
-     * Logic to increment row and reset to top
+     * Updates the entire screen (Car and Matrix)
      */
-    private fun moveObstacleDown() {
-        currentObstacleRow++
-
-        // If it goes past the last row (6), reset to the top
-        if (currentObstacleRow > 6) {
-            currentObstacleRow = 0
+    private fun refreshUI() {
+        // 1. Update Car Visibility
+        for (i in carImages.indices) {
+            carImages[i].visibility = if (i == currentCarLane) View.VISIBLE else View.INVISIBLE
         }
 
-        updateObstacleUI()
-    }
-
-    /**
-     * Updates visibility of left-lane obstacles based on currentObstacleRow
-     */
-    private fun updateObstacleUI() {
-        // First, hide all obstacles in this lane
-        main_IMG_obstacle_0_0.visibility = View.INVISIBLE
-        main_IMG_obstacle_1_0.visibility = View.INVISIBLE
-        main_IMG_obstacle_2_0.visibility = View.INVISIBLE
-        main_IMG_obstacle_3_0.visibility = View.INVISIBLE
-        main_IMG_obstacle_4_0.visibility = View.INVISIBLE
-        main_IMG_obstacle_5_0.visibility = View.INVISIBLE
-        main_IMG_obstacle_6_0.visibility = View.INVISIBLE
-
-        // Show only the one at the current row
-        if (currentObstacleRow == 0) {
-            main_IMG_obstacle_0_0.visibility = View.VISIBLE
-        } else if (currentObstacleRow == 1) {
-            main_IMG_obstacle_1_0.visibility = View.VISIBLE
-        } else if (currentObstacleRow == 2) {
-            main_IMG_obstacle_2_0.visibility = View.VISIBLE
-        } else if (currentObstacleRow == 3) {
-            main_IMG_obstacle_3_0.visibility = View.VISIBLE
-        } else if (currentObstacleRow == 4) {
-            main_IMG_obstacle_4_0.visibility = View.VISIBLE
-        } else if (currentObstacleRow == 5) {
-            main_IMG_obstacle_5_0.visibility = View.VISIBLE
-        } else if (currentObstacleRow == 6) {
-            main_IMG_obstacle_6_0.visibility = View.VISIBLE
+        // 2. Update Obstacle Matrix
+        for (r in 0 until ROWS) {
+            for (c in 0 until COLS) {
+                val resId = logicManager.getResourceId(r, c)
+                if (resId != 0) {
+                    obstacleMatrix[r][c].setImageResource(resId)
+                    obstacleMatrix[r][c].visibility = View.VISIBLE
+                } else {
+                    obstacleMatrix[r][c].visibility = View.INVISIBLE
+                }
+            }
         }
     }
 }
