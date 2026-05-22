@@ -4,7 +4,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- Day Colors -->
-    <color name="background_color">#EEEEEE</color>
+    <color name="background_color">#424242</color>
     <color name="road_color">#444444</color>
     <color name="heart_color">#4CAF50</color>
 </resources>

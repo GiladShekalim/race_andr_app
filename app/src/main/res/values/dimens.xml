@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Lives Indicator -->
-    <dimen name="heart_size">40dp</dimen>
-    <dimen name="heart_margin">4dp</dimen>
+    <dimen name="heart_size">54dp</dimen>
+    <dimen name="heart_margin">12dp</dimen>
     <dimen name="heart_top_margin">60dp</dimen>
 
     <!-- Player and Game Objects -->

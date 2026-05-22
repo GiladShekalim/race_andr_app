@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
@@ -135,7 +136,8 @@ class MainActivity : AppCompatActivity() {
             main_LBL_money_lost.visibility = View.GONE
         }, 1000)
 
-        // Vibrate
+        // Temporary log before vibration
+        Log.d("Collision", "Crash detected! Triggering vibration.")
         vibrate()
 
         // Remove one money bag at a time

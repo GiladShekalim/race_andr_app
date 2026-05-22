@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="-500dp"
+        android:right="-500dp">
+        <rotate
+            android:drawable="@drawable/road_line_dash"
+            android:fromDegrees="90"
+            android:toDegrees="90" />
+    </item>
+</layer-list>
