@@ -1,8 +1,12 @@
 package com.example.avoided_race_app
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
@@ -30,6 +34,9 @@ class MainActivity : AppCompatActivity() {
 
     // Lives (Hearts/Money Bags)
     private lateinit var hearts: Array<AppCompatImageView>
+
+    // Feedback UI
+    private lateinit var main_LBL_money_lost: View
 
     // 4. Timer Components
     private val handler = Handler(Looper.getMainLooper())
@@ -64,6 +71,9 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.main_IMG_heart1),
             findViewById(R.id.main_IMG_heart2)
         )
+
+        // Find Feedback Text
+        main_LBL_money_lost = findViewById(R.id.main_LBL_money_lost)
 
         // Initialize the 2D Array for Obstacles
         obstacleMatrix = Array(ROWS) { r ->
@@ -111,9 +121,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleCollision() {
+        // Show the "MONEY LOST!" text
+        main_LBL_money_lost.visibility = View.VISIBLE
+        
+        // Hide it after 1 second (1000ms)
+        handler.postDelayed({
+            main_LBL_money_lost.visibility = View.GONE
+        }, 1000)
+
+        // Vibrate
+        vibrate()
+
         // Remove one money bag at a time
         lives--
         updateHeartsUI()
+    }
+
+    private fun vibrate() {
+        val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            v.vibrate(500)
+        }
     }
 
     private fun updateHeartsUI() {
