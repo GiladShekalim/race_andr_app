@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     // 2. State Variables
     private var currentCarLane = 1 // 0 = Left, 1 = Center, 2 = Right
+    private var lives = 3
 
     // 3. UI Components
     private lateinit var main_BTN_left: ExtendedFloatingActionButton
@@ -27,6 +28,9 @@ class MainActivity : AppCompatActivity() {
     // Matrix of ImageViews to match our logic grid
     private lateinit var obstacleMatrix: Array<Array<AppCompatImageView>>
 
+    // Lives (Hearts/Money Bags)
+    private lateinit var hearts: Array<AppCompatImageView>
+
     // 4. Timer Components
     private val handler = Handler(Looper.getMainLooper())
     private val DELAY = 500L
@@ -35,7 +39,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        logicManager = LogicManager(ROWS, COLS)
+        // LogicManager handles 8 rows: 7 for obstacles + 1 for collision check
+        logicManager = LogicManager(ROWS + 1, COLS)
         
         findViews()
         initViews()
@@ -51,6 +56,13 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.main_IMG_car_0),
             findViewById(R.id.main_IMG_car_1),
             findViewById(R.id.main_IMG_car_2)
+        )
+
+        // Find Heart Images
+        hearts = arrayOf(
+            findViewById(R.id.main_IMG_heart0),
+            findViewById(R.id.main_IMG_heart1),
+            findViewById(R.id.main_IMG_heart2)
         )
 
         // Initialize the 2D Array for Obstacles
@@ -82,10 +94,39 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed(object : Runnable {
             override fun run() {
                 logicManager.tick()
+                
+                // Identify the crash
+                if (logicManager.checkCollision(currentCarLane)) {
+                    handleCollision()
+                }
+
                 refreshUI()
-                handler.postDelayed(this, DELAY)
+
+                // If no bags are left, the game will stop
+                if (lives > 0) {
+                    handler.postDelayed(this, DELAY)
+                }
             }
         }, DELAY)
+    }
+
+    private fun handleCollision() {
+        // Remove one money bag at a time
+        lives--
+        updateHeartsUI()
+    }
+
+    private fun updateHeartsUI() {
+        for (i in hearts.indices) {
+            // If lives is 2, heart index 2 (the 3rd one) becomes invisible
+            // If lives is 1, heart index 1 and 2 become invisible
+            // If lives is 0, all become invisible
+            if (i >= lives) {
+                hearts[i].visibility = View.INVISIBLE
+            } else {
+                hearts[i].visibility = View.VISIBLE
+            }
+        }
     }
 
     /**
