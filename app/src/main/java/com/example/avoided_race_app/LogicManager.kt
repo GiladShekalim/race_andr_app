@@ -63,4 +63,15 @@ class LogicManager(private val rows: Int, private val cols: Int) {
         // If the bottom row (row 6) in the car's lane has a hazard (> 0), it's a crash!
         return matrix[rows - 1][carLane] > 0
     }
+
+    /**
+     * Clears all hazards from the matrix (Resets the board)
+     */
+    fun clearMatrix() {
+        for (r in 0 until rows) {
+            for (c in 0 until cols) {
+                matrix[r][c] = 0
+            }
+        }
+    }
 }

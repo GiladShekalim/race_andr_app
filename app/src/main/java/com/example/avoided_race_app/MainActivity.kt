@@ -112,16 +112,22 @@ class MainActivity : AppCompatActivity() {
 
                 refreshUI()
 
-                // If no bags are left, the game will stop
-                if (lives > 0) {
-                    handler.postDelayed(this, DELAY)
+                // If no bags are left, reset the game and keep going
+                if (lives <= 0) {
+                    resetGame()
                 }
+                
+                // Keep the loop going (endless)
+                handler.postDelayed(this, DELAY)
             }
         }, DELAY)
     }
 
     private fun handleCollision() {
         // Show the "MONEY LOST!" text
+        if (main_LBL_money_lost is android.widget.TextView) {
+            (main_LBL_money_lost as android.widget.TextView).text = getString(R.string.money_lost)
+        }
         main_LBL_money_lost.visibility = View.VISIBLE
         
         // Hide it after 1 second (1000ms)
@@ -134,6 +140,26 @@ class MainActivity : AppCompatActivity() {
 
         // Remove one money bag at a time
         lives--
+        updateHeartsUI()
+    }
+
+    private fun resetGame() {
+        // Show "BANKRUPT!" text
+        if (main_LBL_money_lost is android.widget.TextView) {
+            (main_LBL_money_lost as android.widget.TextView).text = getString(R.string.bankrupt)
+        }
+        main_LBL_money_lost.visibility = View.VISIBLE
+        
+        // Hide it after 1.5 seconds
+        handler.postDelayed({
+            main_LBL_money_lost.visibility = View.GONE
+        }, 1500)
+
+        // Make all hazards invisible
+        logicManager.clearMatrix()
+        
+        // Reset lives to original (3)
+        lives = 3
         updateHeartsUI()
     }
 

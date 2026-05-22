@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">avoided_race_app</string>
     <string name="money_lost">MONEY LOST!</string>
+    <string name="bankrupt">BANKRUPT!</string>
 </resources>
