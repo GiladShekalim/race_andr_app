@@ -3,7 +3,7 @@
     <!-- Lives Indicator -->
     <dimen name="heart_size">40dp</dimen>
     <dimen name="heart_margin">4dp</dimen>
-    <dimen name="heart_top_margin">16dp</dimen>
+    <dimen name="heart_top_margin">60dp</dimen>
 
     <!-- Player and Game Objects -->
     <dimen name="car_size">80dp</dimen>
