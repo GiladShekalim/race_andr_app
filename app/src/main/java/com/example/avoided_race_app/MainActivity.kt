@@ -1,6 +1,8 @@
 package com.example.avoided_race_app
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -39,13 +41,34 @@ class MainActivity : AppCompatActivity() {
     // Feedback UI
     private lateinit var main_LBL_money_lost: View
 
-    // 4. Timer Components
+    // 4. Sound
+    private lateinit var soundPool: SoundPool
+    private var crashSoundId: Int = 0
+    private var soundLoaded: Boolean = false
+
+    // 5. Timer Components
     private val handler = Handler(Looper.getMainLooper())
     private val DELAY = 500L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(3)
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        soundPool.setOnLoadCompleteListener { _, _, status ->
+            if (status == 0) soundLoaded = true
+        }
+
+        crashSoundId = soundPool.load(this, R.raw.crash_sound, 1)
 
         // LogicManager handles 8 rows: 7 for obstacles + 1 for collision check
         logicManager = LogicManager(ROWS + 1, COLS)
@@ -141,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         // Temporary log before vibration
         Log.d("Collision", "Crash detected! Triggering vibration.")
         vibrate()
+        playCrashSound()
 
         // Remove one money bag at a time
         lives--
@@ -167,6 +191,12 @@ class MainActivity : AppCompatActivity() {
         updateHeartsUI()
     }
 
+    private fun playCrashSound() {
+        if (soundLoaded) {
+            soundPool.play(crashSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+        }
+    }
+
     private fun vibrate() {
         val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -174,6 +204,11 @@ class MainActivity : AppCompatActivity() {
         } else {
             v.vibrate(500)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        soundPool.release()
     }
 
     private fun updateHeartsUI() {
