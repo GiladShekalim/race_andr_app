@@ -4,4 +4,5 @@
     <color name="background_color">#1A1A1A</color>
     <color name="road_color">#222222</color>
     <color name="heart_color">#81C784</color>
+    <color name="score_color">#FFF176</color>
 </resources>

@@ -582,13 +582,13 @@
         android:id="@+id/main_LBL_score"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="@dimen/default_margin"
+        android:layout_below="@id/main_LAY_hearts"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="4dp"
         android:text="@string/score_label"
         android:textSize="@dimen/score_text_size"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
+        android:textColor="@color/score_color"
         android:elevation="2dp" />
 
 </RelativeLayout>

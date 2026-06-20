@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <!-- Outer gold circle -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M32,4a28,28 0 1,0 0,56a28,28 0 1,0 0,-56z" />
+    <!-- Inner highlight ring -->
+    <path
+        android:fillColor="#FFF176"
+        android:pathData="M32,10a22,22 0 1,0 0,44a22,22 0 1,0 0,-44z" />
+    <!-- Dollar sign or coin mark center -->
+    <path
+        android:fillColor="#F9A825"
+        android:pathData="M28,20h8v4h-4v2h4v4h-4v2h4v4h-8v-4h4v-2h-4v-4h4v-2h-4z" />
+</vector>

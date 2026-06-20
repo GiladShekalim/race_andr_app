@@ -10,6 +10,13 @@ class LogicManager(private val rows: Int, private val cols: Int) {
 
     // 2D Array representing the grid. Stores the resource ID of the hazard, or 0 if empty.
     private val matrix: Array<IntArray> = Array(rows) { IntArray(cols) { 0 } }
+    private val coinMatrix: Array<IntArray> = Array(rows) { IntArray(cols) { 0 } }
+
+    private var coinResourceId: Int = 0
+
+    fun setCoinResource(resId: Int) {
+        coinResourceId = resId
+    }
     
     // List of available hazard drawables
     private val hazardResources = listOf(
@@ -49,6 +56,34 @@ class LogicManager(private val rows: Int, private val cols: Int) {
         }
     }
 
+    fun tickCoins() {
+        if (coinResourceId == 0) return
+
+        for (r in rows - 1 downTo 1) {
+            for (c in 0 until cols) {
+                coinMatrix[r][c] = coinMatrix[r - 1][c]
+            }
+        }
+
+        coinMatrix[0] = IntArray(cols) { 0 }
+        if (Random.nextInt(100) < 20) {
+            val spawnCol = Random.nextInt(cols)
+            if (matrix[0][spawnCol] == 0) {
+                coinMatrix[0][spawnCol] = coinResourceId
+            }
+        }
+    }
+
+    fun checkCoinCollection(carLane: Int): Boolean {
+        val collected = coinMatrix[rows - 1][carLane] != 0
+        if (collected) {
+            coinMatrix[rows - 1][carLane] = 0
+        }
+        return collected
+    }
+
+    fun getCoinResourceId(row: Int, col: Int): Int = coinMatrix[row][col]
+
     /**
      * Returns the resource ID at a specific cell.
      */
@@ -71,6 +106,7 @@ class LogicManager(private val rows: Int, private val cols: Int) {
         for (r in 0 until rows) {
             for (c in 0 until cols) {
                 matrix[r][c] = 0
+                coinMatrix[r][c] = 0
             }
         }
     }

@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     // 4. Sound
     private lateinit var soundPool: SoundPool
     private var crashSoundId: Int = 0
+    private var coinSoundId: Int = 0
     private var soundLoaded: Boolean = false
 
     // 5. Timer Components
@@ -71,9 +72,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         crashSoundId = soundPool.load(this, R.raw.crash_sound, 1)
+        coinSoundId = soundPool.load(this, R.raw.coin_sound, 1)
 
         // LogicManager handles 8 rows: 7 for obstacles + 1 for collision check
         logicManager = LogicManager(ROWS + 1, COLS)
+        logicManager.setCoinResource(R.drawable.coin)
         
         findViews()
         initViews()
@@ -134,10 +137,14 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed(object : Runnable {
             override fun run() {
                 logicManager.tick()
-                
-                // Identify the crash
+                logicManager.tickCoins()
+
                 if (logicManager.checkCollision(currentCarLane)) {
                     handleCollision()
+                } else if (logicManager.checkCoinCollection(currentCarLane)) {
+                    score += 10
+                    updateScoreUI()
+                    playCoinSound()
                 }
 
                 refreshUI()
@@ -207,6 +214,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun playCoinSound() {
+        if (soundLoaded) {
+            soundPool.play(coinSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+        }
+    }
+
     private fun vibrate() {
         val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -246,12 +259,17 @@ class MainActivity : AppCompatActivity() {
         // 2. Update Obstacle Matrix
         for (r in 0 until ROWS) {
             for (c in 0 until COLS) {
-                val resId = logicManager.getResourceId(r, c)
-                if (resId != 0) {
-                    obstacleMatrix[r][c].setImageResource(resId)
-                    obstacleMatrix[r][c].visibility = View.VISIBLE
-                } else {
-                    obstacleMatrix[r][c].visibility = View.INVISIBLE
+                val hazardResId = logicManager.getResourceId(r, c)
+                val coinResId = logicManager.getCoinResourceId(r, c)
+                val resId = if (hazardResId > 0) hazardResId else coinResId
+
+                obstacleMatrix[r][c].apply {
+                    if (resId > 0) {
+                        setImageResource(resId)
+                        visibility = View.VISIBLE
+                    } else {
+                        visibility = View.INVISIBLE
+                    }
                 }
             }
         }
