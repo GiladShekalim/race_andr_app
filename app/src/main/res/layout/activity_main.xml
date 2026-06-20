@@ -13,7 +13,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:weightSum="3">
+        android:weightSum="5">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/road_line"
+            android:layerType="software" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/road_line"
+            android:layerType="software" />
 
         <View
             android:layout_width="0dp"
@@ -86,7 +108,7 @@
         android:layout_marginBottom="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:orientation="vertical"
-        android:weightSum="8">
+        android:weightSum="10">
 
         <!-- Obstacle Row 0 -->
         <LinearLayout
@@ -110,6 +132,20 @@
                 tools:srcCompat="@drawable/fuel" />
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main_IMG_obstacle_0_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/fuel" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_0_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/fuel" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_0_4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -144,6 +180,20 @@
                 android:layout_weight="1"
                 android:visibility="invisible"
                 tools:srcCompat="@drawable/clinic" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_1_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/clinic" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_1_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/clinic" />
         </LinearLayout>
 
         <!-- Obstacle Row 2 -->
@@ -168,6 +218,20 @@
                 tools:srcCompat="@drawable/no_tax" />
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main_IMG_obstacle_2_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/no_tax" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_2_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/no_tax" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_2_4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -202,6 +266,20 @@
                 android:layout_weight="1"
                 android:visibility="invisible"
                 tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_3_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_3_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
         </LinearLayout>
 
         <!-- Obstacle Row 4 -->
@@ -226,6 +304,20 @@
                 tools:srcCompat="@drawable/bankrupt" />
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main_IMG_obstacle_4_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/bankrupt" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_4_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/bankrupt" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_4_4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -260,6 +352,20 @@
                 android:layout_weight="1"
                 android:visibility="invisible"
                 tools:srcCompat="@drawable/fuel" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_5_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/fuel" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_5_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/fuel" />
         </LinearLayout>
 
         <!-- Obstacle Row 6 -->
@@ -289,9 +395,109 @@
                 android:layout_weight="1"
                 android:visibility="invisible"
                 tools:srcCompat="@drawable/clinic" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_6_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/clinic" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_6_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/clinic" />
         </LinearLayout>
 
-        <!-- Car Row (Row 7) -->
+        <!-- Obstacle Row 7 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_7_0"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_7_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_7_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_7_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_7_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+        </LinearLayout>
+
+        <!-- Obstacle Row 8 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_8_0"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_8_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_8_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_8_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_obstacle_8_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                tools:srcCompat="@drawable/broken_car" />
+        </LinearLayout>
+
+        <!-- Car Row (Row 9) -->
         <LinearLayout
             android:id="@+id/main_LAY_car_row"
             android:layout_width="match_parent"
@@ -310,10 +516,24 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:visibility="visible"
+                android:visibility="invisible"
                 app:srcCompat="@drawable/racing_car" />
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main_IMG_car_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="visible"
+                app:srcCompat="@drawable/racing_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_car_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/racing_car" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/main_IMG_car_4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

@@ -17,11 +17,11 @@ class MainActivity : AppCompatActivity() {
 
     // 1. Logic Manager (SOLID: Separate Logic from UI)
     private lateinit var logicManager: LogicManager
-    private val ROWS = 7
-    private val COLS = 3
+    private val ROWS = 9
+    private val COLS = 5
 
     // 2. State Variables
-    private var currentCarLane = 1 // 0 = Left, 1 = Center, 2 = Right
+    private var currentCarLane = 2 // center of 5 lanes (0, 1, 2, 3, 4)
     private var lives = 3
 
     // 3. UI Components
@@ -63,7 +63,9 @@ class MainActivity : AppCompatActivity() {
         carImages = arrayOf(
             findViewById(R.id.main_IMG_car_0),
             findViewById(R.id.main_IMG_car_1),
-            findViewById(R.id.main_IMG_car_2)
+            findViewById(R.id.main_IMG_car_2),
+            findViewById(R.id.main_IMG_car_3),
+            findViewById(R.id.main_IMG_car_4)
         )
 
         // Find Heart Images
@@ -94,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         main_BTN_right.setOnClickListener {
-            if (currentCarLane < 2) {
+            if (currentCarLane < COLS - 1) {
                 currentCarLane++
                 refreshUI()
             }
