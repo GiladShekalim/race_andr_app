@@ -75,6 +75,15 @@ Add at the top of `app/build.gradle.kts` plugins block:
 id("kotlin-kapt")
 ```
 
+> **kapt vs KSP:** With Kotlin 2.x (which this project uses), `kapt` (Kotlin Annotation Processing Tool) is deprecated in favor of `ksp` (Kotlin Symbol Processing). `kapt` still works but may emit deprecation warnings. If the build fails with `kapt`, switch to KSP:
+> 1. In `libs.versions.toml` add: `ksp = "2.0.21-1.0.28"` (match the project's kotlin version)
+> 2. In plugins: `ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }`
+> 3. In `app/build.gradle.kts` plugins: `alias(libs.plugins.ksp)` instead of `id("kotlin-kapt")`
+> 4. In dependencies: `ksp(libs.room.compiler)` instead of `kapt(libs.room.compiler)`
+> The rest of the plan is identical for both approaches.
+
+> **`lifecycleScope` availability:** `lifecycleScope` is already available in `AppCompatActivity` via the transitive `lifecycle-runtime-ktx` dependency pulled in by `activity-ktx:1.13.0`. No extra dependency needed.
+
 ---
 
 ## Files to Create
@@ -306,18 +315,23 @@ private fun startLocationUpdates() {
 ```
 
 **Stop location updates in `onDestroy()`:**
+
+Plans 03 and 06 added `soundPool.release()` and `stopOdometer()` — keep those lines. Plans 07, 08, 09 added game loop, tilt, and ramp cleanup. The full definitive `onDestroy()` after all plans through 10:
+
 ```kotlin
 override fun onDestroy() {
     super.onDestroy()
     if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
-    stopRamp()
-    cancelTiltMove()
-    sensorManager.unregisterListener(sensorEventListener)
-    if (::locationCallback.isInitialized) fusedLocationClient.removeLocationUpdates(locationCallback)
-    // soundPool.release()  — if Plan 03 was implemented
-    // stopOdometer()       — if Plan 06 was implemented
+    stopRamp()                                               // from Plan 09
+    cancelTiltMove()                                         // from Plan 08
+    sensorManager.unregisterListener(sensorEventListener)   // from Plan 08
+    if (::locationCallback.isInitialized) fusedLocationClient.removeLocationUpdates(locationCallback)  // ADD
+    stopOdometer()                                           // from Plan 06 — always keep
+    soundPool.release()                                      // from Plan 03 — always keep
 }
 ```
+
+> All preceding-plan cleanup lines must be kept — if a line refers to a field from a plan not yet done (e.g., `stopRamp()` requires Plan 09), omit only that line and add it when implementing that plan.
 
 ---
 
@@ -328,14 +342,15 @@ Replace the `// TODO (Plan 10)` comment with the actual save:
 ```kotlin
 private fun resetGame() {
     if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
-    stopRamp()
+    stopOdometer()  // from Plan 06 — cancel odometer before finish
+    stopRamp()      // from Plan 09 — only present if Plan 09 is done; omit otherwise
 
     if (main_LBL_money_lost is android.widget.TextView) {
         (main_LBL_money_lost as android.widget.TextView).text = getString(R.string.bankrupt)
     }
     main_LBL_money_lost.visibility = View.VISIBLE
 
-    // Save score with location
+    // Save score with location — THIS PLAN adds this block
     val lat = lastKnownLocation?.latitude ?: 0.0
     val lng = lastKnownLocation?.longitude ?: 0.0
     val entry = ScoreEntry(
@@ -351,6 +366,8 @@ private fun resetGame() {
     handler.postDelayed({ finish() }, 1500)
 }
 ```
+
+> `stopRamp()` requires Plan 09 to be done first. If implementing Plan 10 before Plan 09, omit `stopRamp()` and add it later when Plan 09 is implemented.
 
 `lifecycleScope.launch(Dispatchers.IO)` runs the DB insert on a background thread, avoiding main-thread IO. `lifecycleScope` is available in `AppCompatActivity`.
 

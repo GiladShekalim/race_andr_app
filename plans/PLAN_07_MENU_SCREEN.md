@@ -4,7 +4,18 @@
 **Working dir:** `/Users/giladshekalim/repo/androidCourse/avoided_race_app`  
 **Commit scope:** Add a `MenuActivity` as the new app entry point, containing all three settings (control mode, scoreboard button, pace mode), wired to SharedPreferences. Update `MainActivity` to read settings from Intent, stop the game loop before exiting, and `finish()` back to menu on bankrupt instead of resetting in-place.
 
-> **Prerequisites:** Features 04 (score), 05 (coins), 06 (odometer) should be implemented first, as this plan changes how bankrupt is handled — returning to the menu instead of in-game reset. If they are not yet implemented, bankrupt still finishes to menu; the score save call is added as a comment placeholder.
+> **Prerequisites:** Features 02–06 (five lanes, crash sound, score, coins + coin sound, odometer) **must** be implemented before this plan. This plan rewrites both `startTimer()` and `resetGame()` — if any prior feature is not in the code yet, the refactored versions shown here will lose that feature silently.
+
+> **Actual current state of `MainActivity.kt` before this plan runs:**
+> - `private val DELAY = 500L` — fixed constant (not yet a var; that changes in Plan 09)
+> - `ROWS = 9`, `COLS = 5` (Plan 02)
+> - `private lateinit var soundPool: SoundPool`, `crashSoundId`, `coinSoundId`, `soundLoaded` (Plans 03 + 05)
+> - `score = 0`, `updateScoreUI()` (Plan 04)
+> - `coinMatrix` wired via `logicManager.setCoinResource(R.drawable.coin)` (Plan 05)
+> - `odometerHandler`, `odometerRunnable`, `startOdometer()`, `stopOdometer()` (Plan 06)
+> - `onDestroy()` already calls `soundPool.release()` and `stopOdometer()` (Plans 03 + 06)
+> - `startTimer()` uses an **anonymous** inline Runnable — Step 6a extracts it to a named field
+> - `resetGame()` resets in-place (lives, score, clearMatrix, odometer) — Step 6c replaces it with finish() flow
 
 > **Context files:**
 > - `CODE.md` → "`resetGame()`" — this method is replaced with a `finish()` flow here.
@@ -368,19 +379,34 @@ Keep the `<uses-permission android:name="android.permission.VIBRATE" />` line un
 
 **6a — Store gameRunnable as a named field:**
 
-Find the anonymous Runnable inside `startTimer()`. Currently it looks like:
+Find the anonymous Runnable inside `startTimer()`. The **current actual body** of the anonymous Runnable (after Plans 02–06 are done) is:
 ```kotlin
 private fun startTimer() {
     handler.postDelayed(object : Runnable {
         override fun run() {
-            ...
-            handler.postDelayed(this, DELAY)
+            logicManager.tick()
+            logicManager.tickCoins()
+
+            if (logicManager.checkCollision(currentCarLane)) {
+                handleCollision()
+            } else if (logicManager.checkCoinCollection(currentCarLane)) {
+                score += 10
+                updateScoreUI()
+                playCoinSound()
+            }
+
+            refreshUI()
+
+            if (lives <= 0) {
+                resetGame()
+            }
+            handler.postDelayed(this, DELAY)  // ← BUG: fires even after resetGame()
         }
     }, DELAY)
 }
 ```
 
-Refactor: extract the Runnable to a field at the top of the class:
+Refactor: extract to a named field and fix the post-bankrupt loop bug with `return`:
 ```kotlin
 private lateinit var gameRunnable: Runnable
 
@@ -388,13 +414,21 @@ private fun startTimer() {
     gameRunnable = object : Runnable {
         override fun run() {
             logicManager.tick()
+            logicManager.tickCoins()
+
             if (logicManager.checkCollision(currentCarLane)) {
                 handleCollision()
+            } else if (logicManager.checkCoinCollection(currentCarLane)) {
+                score += 10
+                updateScoreUI()
+                playCoinSound()
             }
+
             refreshUI()
+
             if (lives <= 0) {
                 resetGame()
-                return
+                return  // CRITICAL: stop the loop — handler.postDelayed must NOT fire after resetGame()
             }
             handler.postDelayed(this, DELAY)
         }
@@ -402,6 +436,10 @@ private fun startTimer() {
     handler.postDelayed(gameRunnable, DELAY)
 }
 ```
+
+The `return` after `resetGame()` is the key bug fix: without it, `handler.postDelayed(this, DELAY)` fires even after `finish()` is scheduled, posting to a destroyed Activity.
+
+> **Note for Plan 09:** Plan 09 changes `DELAY` from `val` to `var`. The gameRunnable already uses `DELAY` as a variable reference, so Plan 09's change is compatible with this extraction — no change to gameRunnable body needed in Plan 09.
 
 **6b — Read settings from Intent:**
 
@@ -419,10 +457,27 @@ pace = intent.getStringExtra(GameSettings.EXTRA_PACE) ?: GameSettings.PACE_STEAD
 
 **6c — Replace `resetGame()` with finish-to-menu flow:**
 
+The **current `resetGame()`** (before this plan) does an in-place reset:
+```kotlin
+// CURRENT (before Plan 07 — DO NOT keep this)
+private fun resetGame() {
+    stopOdometer()
+    logicManager.clearMatrix()
+    lives = 3
+    updateHeartsUI()
+    score = 0
+    updateScoreUI()
+    // ... show BANKRUPT! then startOdometer() after 1500ms
+}
+```
+
+**Replace the entire method** with a finish() flow. No in-place reset is needed because `MainActivity` is recreated fresh on the next game start. Note: `stopOdometer()` is still required to cancel the odometer Handler before returning to menu — without it, the odometer keeps incrementing during the 1500ms BANKRUPT! display and may fire into a destroyed Activity.
+
 ```kotlin
 private fun resetGame() {
-    // Stop the game loop immediately
+    // Stop all running handlers before returning to menu
     if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
+    stopOdometer()  // Plan 06 — cancel the +1/sec odometer before finish()
 
     // Show BANKRUPT! overlay
     if (main_LBL_money_lost is android.widget.TextView) {
@@ -430,22 +485,32 @@ private fun resetGame() {
     }
     main_LBL_money_lost.visibility = View.VISIBLE
 
+    // TODO (Plan 09): stopRamp() goes here when fastening pace is implemented
     // TODO (Plan 10): save score + GPS location here before finishing
 
     handler.postDelayed({ finish() }, 1500)
 }
 ```
 
-**6d — Add `onDestroy()` for handler cleanup:**
+`logicManager.clearMatrix()`, `lives = 3`, `score = 0` are **not** needed here — the fresh `MainActivity` instance starts with clean state every time.
+
+**6d — Update `onDestroy()` for handler cleanup:**
+
+Plans 03 and 06 already added `onDestroy()` with `soundPool.release()` and `stopOdometer()`. This plan extends it to also cancel the gameRunnable. The full `onDestroy()` after this plan:
 
 ```kotlin
 override fun onDestroy() {
     super.onDestroy()
     if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
-    // If Feature 03 (SoundPool) was implemented: soundPool.release()
-    // If Feature 06 (Odometer) was implemented: stopOdometer()
+    stopOdometer()       // from Plan 06 — already present; keep it
+    soundPool.release()  // from Plan 03 — already present; keep it
+    // TODO (Plan 08): add cancelTiltMove() + sensorManager.unregisterListener() here
+    // TODO (Plan 09): add stopRamp() here
+    // TODO (Plan 10): add fusedLocationClient.removeLocationUpdates() here
 }
 ```
+
+If the existing `onDestroy()` only has `soundPool.release()` and `stopOdometer()`, add the `gameRunnable` line at the top. Do **not** remove the existing lines.
 
 ---
 

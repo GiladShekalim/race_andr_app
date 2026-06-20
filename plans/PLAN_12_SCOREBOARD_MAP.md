@@ -236,12 +236,16 @@ class ScoreMapFragment : Fragment() {
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
             if (entry == highlightedEntry) {
-                // Highlighted pin: use accent color tint (gold)
-                marker.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_location_on_24)
-                    ?.mutate()
-                    ?.also { it.setTint(0xFFFFD700.toInt()) }
+                // Highlighted pin: tint OSMDroid's built-in marker icon gold.
+                // Option A (simple — no extra drawable needed):
+                marker.icon = ContextCompat.getDrawable(
+                    requireContext(), org.osmdroid.library.R.drawable.marker_default
+                )?.mutate()?.also { it.setTint(0xFFFFD700.toInt()) }
+                // Option B (custom icon — requires creating res/drawable/ic_location_pin.xml first):
+                // marker.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_location_pin)
+                //     ?.mutate()?.also { it.setTint(0xFFFFD700.toInt()) }
             }
-            // Default: OSMDroid uses its own default marker icon when icon is null
+            // Default pins: OSMDroid uses its default orange marker when icon is not set (null)
 
             mapView.overlays.add(marker)
         }
@@ -268,7 +272,7 @@ class ScoreMapFragment : Fragment() {
 }
 ```
 
-**About `R.drawable.ic_baseline_location_on_24`:** This is a standard Material Design icon available in Android. Add it via: in Android Studio, right-click `res/drawable` → New → Vector Asset → search "location_on". It's a simple map pin SVG. Alternatively, leave `marker.icon = null` for OSMDroid's default orange pin (no custom drawable needed).
+**About the highlighted marker icon:** The code above uses `org.osmdroid.library.R.drawable.marker_default` — OSMDroid's own bundled marker drawable, tinted gold. This requires no extra files in your project. The alternative `ic_location_pin` approach requires creating an SVG drawable first (see `DRAWABLES.md` → "Adding a Custom Asset" for how to create vector drawables programmatically). Start with Option A (OSMDroid built-in) and only switch to Option B if a custom shape is needed.
 
 ---
 

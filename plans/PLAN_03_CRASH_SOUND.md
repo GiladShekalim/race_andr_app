@@ -196,3 +196,4 @@ at startup for low-latency game audio. Released in onDestroy().
 - If the provided audio file is in `.mp3` format, rename it to `crash_sound.mp3` and update the `soundPool.load()` call — the R.raw reference will resolve by filename without extension.
 - `soundLoaded` guard prevents a crash if `handleCollision()` fires before the async load completes (rare but possible on very slow devices).
 - If vibration is found to be redundant with sound, the `vibrate()` call in `handleCollision()` can be removed or made optional — see `CODE.md` → "`vibrate()`" for its current implementation.
+- **Plan 05 (Coins) will add a second sound (`coin_sound.ogg`) to the same `SoundPool`.** The `setMaxStreams(3)` set here is sufficient to cover both crash and coin sounds playing simultaneously. No changes to `SoundPool` setup are needed when Plan 05 is implemented — Plan 05 only adds a new `coinSoundId` field and one extra `soundPool.load()` call.

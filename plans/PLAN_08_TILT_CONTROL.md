@@ -221,16 +221,18 @@ override fun onPause() {
 
 ### Step 9 — Add tilt cleanup to `onDestroy()`
 
-In the existing `onDestroy()` (added in Plan 07), add:
+In the existing `onDestroy()` (Plan 07 added it; Plans 03 and 06 added `soundPool.release()` and `stopOdometer()`), add the tilt sensor cleanup. Keep all existing lines:
 
 ```kotlin
 override fun onDestroy() {
     super.onDestroy()
     if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
-    cancelTiltMove()
-    sensorManager.unregisterListener(sensorEventListener)
-    // soundPool.release() — if Plan 03 was implemented
-    // stopOdometer()      — if Plan 06 was implemented
+    cancelTiltMove()                                        // ADD this plan
+    sensorManager.unregisterListener(sensorEventListener)  // ADD this plan
+    stopOdometer()                                          // from Plan 06 — keep
+    soundPool.release()                                     // from Plan 03 — keep
+    // TODO (Plan 09): add stopRamp() here
+    // TODO (Plan 10): add fusedLocationClient.removeLocationUpdates() here
 }
 ```
 

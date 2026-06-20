@@ -31,16 +31,56 @@
 | File | Action |
 |---|---|
 | `app/src/main/res/drawable/coin.xml` | **Create** — new coin vector drawable |
+| `app/src/main/res/raw/coin_sound.ogg` | **Create** — coin collection sound effect |
 | `app/src/main/java/com/example/avoided_race_app/LogicManager.kt` | Add `coinMatrix`, `tickCoins()`, `checkCoinCollection()`, update `clearMatrix()` |
-| `app/src/main/java/com/example/avoided_race_app/MainActivity.kt` | Initialize coin resource, call `tickCoins()` and `checkCoinCollection()` in game loop, update `refreshUI()` |
+| `app/src/main/java/com/example/avoided_race_app/MainActivity.kt` | Add `coinSoundId`, load sound, call `tickCoins()` and `checkCoinCollection()` in game loop, add `playCoinSound()`, update `refreshUI()` |
 
 No XML layout changes. The existing `obstacleMatrix` ImageViews display both hazards and coins.
+
+> **Note on SoundPool:** Plan 03 already set up a `SoundPool` with `setMaxStreams(3)`. This plan adds a second sound to the same pool — no SoundPool rebuild needed, only a new load call and ID field.
 
 ---
 
 ## Step-by-Step Implementation
 
-### Step 1 — Create `res/drawable/coin.xml`
+### Step 1 — Add `res/raw/coin_sound.ogg`
+
+Create the `res/raw/` directory if it doesn't exist (Plan 03 already created it).
+
+Place a short coin-collection sound file at:
+```
+app/src/main/res/raw/coin_sound.ogg
+```
+
+Any short (< 0.5s) positive chime or ding sound works. Accepted formats: `.ogg`, `.wav`, `.mp3`. Use the same naming convention as `crash_sound.ogg`.
+
+---
+
+### Step 2 — Add `coinSoundId` to `MainActivity`
+
+**2a — Add field** (near `crashSoundId` declared in Plan 03):
+```kotlin
+private var coinSoundId: Int = 0
+```
+
+**2b — Load in `onCreate()`** immediately after the `crashSoundId` load line:
+```kotlin
+crashSoundId = soundPool.load(this, R.raw.crash_sound, 1)
+coinSoundId = soundPool.load(this, R.raw.coin_sound, 1)  // ADD
+```
+
+**2c — Add `playCoinSound()` method** (alongside `playCrashSound()`):
+```kotlin
+private fun playCoinSound() {
+    if (soundLoaded) {
+        soundPool.play(coinSoundId, 1.0f, 1.0f, 1, 0, 1.0f)
+    }
+}
+```
+
+---
+
+### Step 4 — Create `res/drawable/coin.xml`
 
 Create a simple gold circle vector drawable. File: `app/src/main/res/drawable/coin.xml`
 
@@ -69,7 +109,7 @@ The center path renders a simplified `$` shape. Adjust colors or the center mark
 
 ---
 
-### Step 2 — Update `LogicManager.kt`
+### Step 5 — Update `LogicManager.kt`
 
 File: `app/src/main/java/com/example/avoided_race_app/LogicManager.kt`
 
@@ -152,18 +192,18 @@ fun clearMatrix() {
 
 ---
 
-### Step 3 — Update `MainActivity.kt`
+### Step 6 — Update `MainActivity.kt`
 
 File: `app/src/main/java/com/example/avoided_race_app/MainActivity.kt`
 
-**3a — Pass coin resource ID to `LogicManager` in `onCreate()`:**
+**6a — Pass coin resource ID to `LogicManager` in `onCreate()`:**
 
 After `logicManager` is initialized (find the `LogicManager(ROWS + 1, COLS, ...)` constructor call), add:
 ```kotlin
 logicManager.setCoinResource(R.drawable.coin)
 ```
 
-**3b — Call `tickCoins()` in the game loop:**
+**6b — Call `tickCoins()` in the game loop, and play coin sound on collection:**
 
 In `startTimer()`, find the existing tick sequence:
 ```kotlin
@@ -184,6 +224,7 @@ if (logicManager.checkCollision(currentCarLane)) {
 } else if (logicManager.checkCoinCollection(currentCarLane)) {
     score += 10             // ADD — collect coin
     updateScoreUI()         // ADD — refresh display
+    playCoinSound()         // ADD — play coin collection sound (added in Step 2c)
 }
 
 refreshUI()
@@ -191,7 +232,7 @@ refreshUI()
 
 **Important:** Use `else if` — a cell can't be both a hazard collision and a coin collection in the same tick. The hazard check takes priority.
 
-**3c — Update `refreshUI()` to render coins:**
+**6c — Update `refreshUI()` to render coins:**
 
 Currently `refreshUI()` sets each ImageView's resource based on `logicManager.getResourceId(r, c)`. Update each cell to check both matrices:
 
@@ -236,7 +277,7 @@ Since hazards and coins never share the same cell (spawn guard in `tickCoins()`)
 
 ---
 
-### Step 4 — Verify
+### Step 7 — Verify
 
 Run the app. Confirm:
 - [ ] Gold coin objects appear on the road and fall downward
@@ -247,6 +288,7 @@ Run the app. Confirm:
 - [ ] Coins disappear from the grid after collection or after passing the bottom row
 - [ ] `clearMatrix()` correctly clears both hazards and coins on game reset
 - [ ] Score and coins both reset on bankrupt
+- [ ] A distinct sound plays when a coin is collected (different from crash sound)
 
 ---
 

@@ -44,6 +44,21 @@
 
 ---
 
+## Dependencies
+
+No new dependencies are required for this plan. `RecyclerView` (`androidx.recyclerview:recyclerview`) is pulled in transitively by `material:1.14.0`. `lifecycleScope` is available via the existing `activity-ktx:1.13.0`. If the build fails with a `RecyclerView` symbol-not-found error, explicitly add to `libs.versions.toml`:
+
+```toml
+[versions]
+recyclerview = "1.4.0"
+[libraries]
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+```
+
+Then add `implementation(libs.recyclerview)` to `app/build.gradle.kts`.
+
+---
+
 ## Files to Create
 
 | File | Purpose |

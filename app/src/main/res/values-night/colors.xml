@@ -5,4 +5,5 @@
     <color name="road_color">#222222</color>
     <color name="heart_color">#81C784</color>
     <color name="score_color">#FFF176</color>
+    <color name="overlay_text_color">#FF5252</color>
 </resources>

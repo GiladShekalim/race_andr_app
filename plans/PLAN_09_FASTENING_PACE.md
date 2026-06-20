@@ -90,8 +90,9 @@ private fun startRamp() {
         override fun run() {
             if (DELAY > MIN_DELAY) {
                 DELAY = maxOf(MIN_DELAY, DELAY - RAMP_STEP)
+                rampHandler.postDelayed(this, RAMP_INTERVAL)  // only keep posting if not at floor
             }
-            rampHandler.postDelayed(this, RAMP_INTERVAL)
+            // Once DELAY == MIN_DELAY: ramp stops itself — no further postDelayed
         }
     }
     rampHandler.postDelayed(rampRunnable, RAMP_INTERVAL)
@@ -102,7 +103,7 @@ private fun stopRamp() {
 }
 ```
 
-The first ramp fires after 10 seconds. At 500ms tick speed, that's ~20 hazard ticks before the first speed increase. At maximum speed (150ms/tick), obstacles fall 3× faster than the starting speed.
+The first ramp fires after 10 seconds. At 500ms tick speed, that's ~20 hazard ticks before the first speed increase. At maximum speed (150ms/tick), obstacles fall 3× faster than the starting speed. The ramp self-terminates when `MIN_DELAY` is reached.
 
 ---
 
@@ -142,19 +143,24 @@ private fun resetGame() {
 
 ### Step 6 — Cancel ramp in `onDestroy()`
 
-In `onDestroy()` (added in Plan 07, extended in Plan 08):
+In `onDestroy()` (added in Plan 07, extended in Plan 08), add `stopRamp()`. Plans 03 and 06 added `soundPool.release()` and `stopOdometer()` — keep those lines. Plan 08 added tilt cleanup — keep those lines if Plan 08 is done.
+
+Full `onDestroy()` after this plan (assuming Plans 03, 06, 07, 08 are done):
 
 ```kotlin
 override fun onDestroy() {
     super.onDestroy()
     if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
-    stopRamp()                                   // ADD
-    cancelTiltMove()                             // from Plan 08
-    sensorManager.unregisterListener(sensorEventListener)  // from Plan 08
-    // soundPool.release()  — if Plan 03 was implemented
-    // stopOdometer()       — if Plan 06 was implemented
+    stopRamp()                                               // ADD this plan
+    cancelTiltMove()                                         // from Plan 08 (keep if Plan 08 is done)
+    sensorManager.unregisterListener(sensorEventListener)   // from Plan 08 (keep if Plan 08 is done)
+    stopOdometer()                                           // from Plan 06 — always keep
+    soundPool.release()                                      // from Plan 03 — always keep
+    // TODO (Plan 10): add fusedLocationClient.removeLocationUpdates() here
 }
 ```
+
+> **If Plan 08 is not yet done:** omit the `cancelTiltMove()` and `sensorManager.unregisterListener()` lines — those fields don't exist yet. Plan 08 will add them.
 
 ---
 
