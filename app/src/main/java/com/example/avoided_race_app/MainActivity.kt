@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     // 2. State Variables
     private var currentCarLane = 2 // center of 5 lanes (0, 1, 2, 3, 4)
     private var lives = 3
+    private var score = 0
 
     // 3. UI Components
     private lateinit var main_BTN_left: ExtendedFloatingActionButton
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     // Feedback UI
     private lateinit var main_LBL_money_lost: View
+    private lateinit var main_LBL_score: com.google.android.material.textview.MaterialTextView
 
     // 4. Sound
     private lateinit var soundPool: SoundPool
@@ -100,6 +102,7 @@ class MainActivity : AppCompatActivity() {
 
         // Find Feedback Text
         main_LBL_money_lost = findViewById(R.id.main_LBL_money_lost)
+        main_LBL_score = findViewById(R.id.main_LBL_score)
 
         // Initialize the 2D Array for Obstacles
         obstacleMatrix = Array(ROWS) { r ->
@@ -124,6 +127,7 @@ class MainActivity : AppCompatActivity() {
                 refreshUI()
             }
         }
+        updateScoreUI()
     }
 
     private fun startTimer() {
@@ -189,6 +193,12 @@ class MainActivity : AppCompatActivity() {
         // Reset lives to original (3)
         lives = 3
         updateHeartsUI()
+        score = 0
+        updateScoreUI()
+    }
+
+    private fun updateScoreUI() {
+        main_LBL_score.text = getString(R.string.score_label, score)
     }
 
     private fun playCrashSound() {

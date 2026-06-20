@@ -12,4 +12,5 @@
     <!-- Spacing -->
     <dimen name="default_margin">16dp</dimen>
     <dimen name="car_bottom_margin">100dp</dimen>
+    <dimen name="score_text_size">22sp</dimen>
 </resources>
