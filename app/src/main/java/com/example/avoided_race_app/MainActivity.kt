@@ -52,6 +52,8 @@ class MainActivity : AppCompatActivity() {
     // 5. Timer Components
     private val handler = Handler(Looper.getMainLooper())
     private val DELAY = 500L
+    private val odometerHandler = Handler(Looper.getMainLooper())
+    private lateinit var odometerRunnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         findViews()
         initViews()
         startTimer()
+        startOdometer()
     }
 
     private fun findViews() {
@@ -188,20 +191,37 @@ class MainActivity : AppCompatActivity() {
             (main_LBL_money_lost as android.widget.TextView).text = getString(R.string.bankrupt)
         }
         main_LBL_money_lost.visibility = View.VISIBLE
-        
-        // Hide it after 1.5 seconds
+
+        stopOdometer()
+
         handler.postDelayed({
             main_LBL_money_lost.visibility = View.GONE
+            startOdometer()
         }, 1500)
 
         // Make all hazards invisible
         logicManager.clearMatrix()
-        
+
         // Reset lives to original (3)
         lives = 3
         updateHeartsUI()
         score = 0
         updateScoreUI()
+    }
+
+    private fun startOdometer() {
+        odometerRunnable = object : Runnable {
+            override fun run() {
+                score++
+                updateScoreUI()
+                odometerHandler.postDelayed(this, 1000)
+            }
+        }
+        odometerHandler.postDelayed(odometerRunnable, 1000)
+    }
+
+    private fun stopOdometer() {
+        odometerHandler.removeCallbacks(odometerRunnable)
     }
 
     private fun updateScoreUI() {
@@ -232,6 +252,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         soundPool.release()
+        stopOdometer()
     }
 
     private fun updateHeartsUI() {
