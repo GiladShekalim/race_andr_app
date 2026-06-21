@@ -1,6 +1,10 @@
 package com.example.avoided_race_app
 
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.os.Build
@@ -58,6 +62,13 @@ class MainActivity : AppCompatActivity() {
     private val odometerHandler = Handler(Looper.getMainLooper())
     private lateinit var odometerRunnable: Runnable
 
+    // 6. Tilt / Sensor
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+    private val tiltHandler = Handler(Looper.getMainLooper())
+    private var tiltRunnable: Runnable? = null
+    private val TILT_THRESHOLD = 3.0f
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -81,6 +92,9 @@ class MainActivity : AppCompatActivity() {
 
         controlMode = intent.getStringExtra(GameSettings.EXTRA_CONTROL_MODE) ?: GameSettings.CONTROL_BUTTONS
         pace = intent.getStringExtra(GameSettings.EXTRA_PACE) ?: GameSettings.PACE_STEADY
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         // LogicManager handles 8 rows: 7 for obstacles + 1 for collision check
         logicManager = LogicManager(ROWS + 1, COLS)
@@ -126,19 +140,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        main_BTN_left.setOnClickListener {
-            if (currentCarLane > 0) {
-                currentCarLane--
-                refreshUI()
-            }
+        main_BTN_left.setOnClickListener { moveCar(-1) }
+        main_BTN_right.setOnClickListener { moveCar(1) }
+
+        if (controlMode == GameSettings.CONTROL_TILT) {
+            main_BTN_left.visibility = View.GONE
+            main_BTN_right.visibility = View.GONE
         }
 
-        main_BTN_right.setOnClickListener {
-            if (currentCarLane < COLS - 1) {
-                currentCarLane++
-                refreshUI()
-            }
-        }
         updateScoreUI()
     }
 
@@ -203,6 +212,66 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed({ finish() }, 1500)
     }
 
+    private val sensorEventListener = object : SensorEventListener {
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { /* required, unused */ }
+
+        override fun onSensorChanged(event: SensorEvent) {
+            if (event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
+            if (controlMode != GameSettings.CONTROL_TILT) return
+
+            val tiltX = event.values[0]
+            when {
+                tiltX > TILT_THRESHOLD  -> scheduleTiltMove(direction = -1, tiltMagnitude = tiltX)
+                tiltX < -TILT_THRESHOLD -> scheduleTiltMove(direction = 1, tiltMagnitude = -tiltX)
+                else                    -> cancelTiltMove()
+            }
+        }
+    }
+
+    private fun scheduleTiltMove(direction: Int, tiltMagnitude: Float) {
+        tiltRunnable?.let { tiltHandler.removeCallbacks(it) }
+        val cooldown = maxOf(150L, 500L - ((tiltMagnitude - TILT_THRESHOLD) * 50).toLong())
+        tiltRunnable = object : Runnable {
+            override fun run() {
+                moveCar(direction)
+                tiltHandler.postDelayed(this, cooldown)
+            }
+        }
+        tiltHandler.post(tiltRunnable!!)
+    }
+
+    private fun cancelTiltMove() {
+        tiltRunnable?.let { tiltHandler.removeCallbacks(it) }
+        tiltRunnable = null
+    }
+
+    private fun moveCar(direction: Int) {
+        val newLane = currentCarLane + direction
+        if (newLane in 0 until COLS) {
+            currentCarLane = newLane
+            refreshUI()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (controlMode == GameSettings.CONTROL_TILT) {
+            accelerometer?.let {
+                sensorManager.registerListener(
+                    sensorEventListener,
+                    it,
+                    SensorManager.SENSOR_DELAY_GAME
+                )
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(sensorEventListener)
+        cancelTiltMove()
+    }
+
     private fun startOdometer() {
         odometerRunnable = object : Runnable {
             override fun run() {
@@ -246,6 +315,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
+        cancelTiltMove()
+        sensorManager.unregisterListener(sensorEventListener)
         stopOdometer()
         soundPool.release()
     }
