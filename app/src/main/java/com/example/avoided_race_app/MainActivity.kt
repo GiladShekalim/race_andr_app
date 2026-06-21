@@ -1,10 +1,13 @@
 package com.example.avoided_race_app
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.os.Build
@@ -17,7 +20,19 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.avoided_race_app.db.ScoreEntry
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,6 +90,12 @@ class MainActivity : AppCompatActivity() {
     private var tiltRunnable: Runnable? = null
     private val TILT_THRESHOLD = 3.0f
 
+    // 7. Location
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var lastKnownLocation: Location? = null
+    private lateinit var locationCallback: LocationCallback
+    private val LOCATION_PERMISSION_REQUEST = 1001
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -111,6 +132,9 @@ class MainActivity : AppCompatActivity() {
         startTimer()
         startOdometer()
         if (pace == GameSettings.PACE_FASTENING) startRamp()
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        requestLocationPermission()
     }
 
     private fun findViews() {
@@ -217,7 +241,59 @@ class MainActivity : AppCompatActivity() {
         }
         main_LBL_money_lost.visibility = View.VISIBLE
 
+        val lat = lastKnownLocation?.latitude ?: 0.0
+        val lng = lastKnownLocation?.longitude ?: 0.0
+        val entry = ScoreEntry(
+            score = score,
+            timestamp = System.currentTimeMillis(),
+            latitude = lat,
+            longitude = lng
+        )
+        lifecycleScope.launch(Dispatchers.IO) {
+            (application as GameApplication).database.scoreDao().insert(entry)
+        }
+
         handler.postDelayed({ finish() }, 1500)
+    }
+
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            startLocationUpdates()
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST &&
+            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startLocationUpdates()
+        }
+    }
+
+    private fun startLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) return
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                lastKnownLocation = result.lastLocation
+            }
+        }
+
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_BALANCED_POWER_ACCURACY, 5000L
+        ).build()
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
     }
 
     private val sensorEventListener = object : SensorEventListener {
@@ -344,6 +420,9 @@ class MainActivity : AppCompatActivity() {
         sensorManager.unregisterListener(sensorEventListener)
         stopOdometer()
         soundPool.release()
+        if (::locationCallback.isInitialized) {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
     }
 
     private fun updateHeartsUI() {
