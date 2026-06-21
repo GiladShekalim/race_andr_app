@@ -57,10 +57,16 @@ class MainActivity : AppCompatActivity() {
 
     // 5. Timer Components
     private val handler = Handler(Looper.getMainLooper())
-    private val DELAY = 500L
+    private val BASE_DELAY = 500L
+    private var DELAY = BASE_DELAY
     private lateinit var gameRunnable: Runnable
     private val odometerHandler = Handler(Looper.getMainLooper())
     private lateinit var odometerRunnable: Runnable
+    private val rampHandler = Handler(Looper.getMainLooper())
+    private lateinit var rampRunnable: Runnable
+    private val RAMP_INTERVAL = 10_000L
+    private val RAMP_STEP = 25L
+    private val MIN_DELAY = 150L
 
     // 6. Tilt / Sensor
     private lateinit var sensorManager: SensorManager
@@ -104,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         initViews()
         startTimer()
         startOdometer()
+        if (pace == GameSettings.PACE_FASTENING) startRamp()
     }
 
     private fun findViews() {
@@ -202,6 +209,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun resetGame() {
         if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
+        stopRamp()
         stopOdometer()
 
         if (main_LBL_money_lost is android.widget.TextView) {
@@ -272,6 +280,22 @@ class MainActivity : AppCompatActivity() {
         cancelTiltMove()
     }
 
+    private fun startRamp() {
+        rampRunnable = object : Runnable {
+            override fun run() {
+                if (DELAY > MIN_DELAY) {
+                    DELAY = maxOf(MIN_DELAY, DELAY - RAMP_STEP)
+                    rampHandler.postDelayed(this, RAMP_INTERVAL)
+                }
+            }
+        }
+        rampHandler.postDelayed(rampRunnable, RAMP_INTERVAL)
+    }
+
+    private fun stopRamp() {
+        if (::rampRunnable.isInitialized) rampHandler.removeCallbacks(rampRunnable)
+    }
+
     private fun startOdometer() {
         odometerRunnable = object : Runnable {
             override fun run() {
@@ -315,6 +339,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
+        stopRamp()
         cancelTiltMove()
         sensorManager.unregisterListener(sensorEventListener)
         stopOdometer()
