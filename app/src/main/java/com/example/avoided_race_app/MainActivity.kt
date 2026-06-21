@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private var currentCarLane = 2 // center of 5 lanes (0, 1, 2, 3, 4)
     private var lives = 3
     private var score = 0
+    private var controlMode: String = GameSettings.CONTROL_BUTTONS
+    private var pace: String = GameSettings.PACE_STEADY
 
     // 3. UI Components
     private lateinit var main_BTN_left: ExtendedFloatingActionButton
@@ -52,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     // 5. Timer Components
     private val handler = Handler(Looper.getMainLooper())
     private val DELAY = 500L
+    private lateinit var gameRunnable: Runnable
     private val odometerHandler = Handler(Looper.getMainLooper())
     private lateinit var odometerRunnable: Runnable
 
@@ -75,6 +78,9 @@ class MainActivity : AppCompatActivity() {
 
         crashSoundId = soundPool.load(this, R.raw.crash_sound, 1)
         coinSoundId = soundPool.load(this, R.raw.coin_sound, 1)
+
+        controlMode = intent.getStringExtra(GameSettings.EXTRA_CONTROL_MODE) ?: GameSettings.CONTROL_BUTTONS
+        pace = intent.getStringExtra(GameSettings.EXTRA_PACE) ?: GameSettings.PACE_STEADY
 
         // LogicManager handles 8 rows: 7 for obstacles + 1 for collision check
         logicManager = LogicManager(ROWS + 1, COLS)
@@ -137,7 +143,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        handler.postDelayed(object : Runnable {
+        gameRunnable = object : Runnable {
             override fun run() {
                 logicManager.tick()
                 logicManager.tickCoins()
@@ -152,15 +158,15 @@ class MainActivity : AppCompatActivity() {
 
                 refreshUI()
 
-                // If no bags are left, reset the game and keep going
                 if (lives <= 0) {
                     resetGame()
+                    return
                 }
-                
-                // Keep the loop going (endless)
+
                 handler.postDelayed(this, DELAY)
             }
-        }, DELAY)
+        }
+        handler.postDelayed(gameRunnable, DELAY)
     }
 
     private fun handleCollision() {
@@ -186,27 +192,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetGame() {
-        // Show "BANKRUPT!" text
+        if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
+        stopOdometer()
+
         if (main_LBL_money_lost is android.widget.TextView) {
             (main_LBL_money_lost as android.widget.TextView).text = getString(R.string.bankrupt)
         }
         main_LBL_money_lost.visibility = View.VISIBLE
 
-        stopOdometer()
-
-        handler.postDelayed({
-            main_LBL_money_lost.visibility = View.GONE
-            startOdometer()
-        }, 1500)
-
-        // Make all hazards invisible
-        logicManager.clearMatrix()
-
-        // Reset lives to original (3)
-        lives = 3
-        updateHeartsUI()
-        score = 0
-        updateScoreUI()
+        handler.postDelayed({ finish() }, 1500)
     }
 
     private fun startOdometer() {
@@ -251,8 +245,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        soundPool.release()
+        if (::gameRunnable.isInitialized) handler.removeCallbacks(gameRunnable)
         stopOdometer()
+        soundPool.release()
     }
 
     private fun updateHeartsUI() {

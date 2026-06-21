@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="@color/background_color">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AVOIDED RACE"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="48dp" />
+
+    <!-- Setting 1: Control Mode -->
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Controls"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/menu_RG_control_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="32dp">
+
+        <RadioButton
+            android:id="@+id/menu_RB_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Buttons"
+            android:textColor="@android:color/white"
+            android:buttonTint="@android:color/white"
+            android:layout_marginEnd="24dp" />
+
+        <RadioButton
+            android:id="@+id/menu_RB_tilt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tilt"
+            android:textColor="@android:color/white"
+            android:buttonTint="@android:color/white" />
+    </RadioGroup>
+
+    <!-- Setting 3: Pace Mode -->
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pace"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/menu_RG_pace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="48dp">
+
+        <RadioButton
+            android:id="@+id/menu_RB_steady"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Steady"
+            android:textColor="@android:color/white"
+            android:buttonTint="@android:color/white"
+            android:layout_marginEnd="24dp" />
+
+        <RadioButton
+            android:id="@+id/menu_RB_fastening"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fastening"
+            android:textColor="@android:color/white"
+            android:buttonTint="@android:color/white" />
+    </RadioGroup>
+
+    <!-- Start Game -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/menu_BTN_start"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="START GAME"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Scoreboard -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/menu_BTN_scoreboard"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="SCOREBOARD" />
+
+</LinearLayout>
