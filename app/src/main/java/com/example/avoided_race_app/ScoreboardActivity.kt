@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
 interface OnScoreSelectedListener {
-    fun onScoreSelected(latitude: Double, longitude: Double)
+    fun onScoreSelected(entryId: Int, latitude: Double, longitude: Double)
 }
 
 class ScoreboardActivity : AppCompatActivity(), OnScoreSelectedListener {
@@ -12,6 +12,8 @@ class ScoreboardActivity : AppCompatActivity(), OnScoreSelectedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scoreboard)
+
+        findViewById<android.widget.ImageButton>(R.id.scoreboard_BTN_back).setOnClickListener { finish() }
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -21,9 +23,9 @@ class ScoreboardActivity : AppCompatActivity(), OnScoreSelectedListener {
         }
     }
 
-    override fun onScoreSelected(latitude: Double, longitude: Double) {
+    override fun onScoreSelected(entryId: Int, latitude: Double, longitude: Double) {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.scoreboard_FRAME_map) as? ScoreMapFragment
-        mapFragment?.centerOn(latitude, longitude)
+        mapFragment?.centerOn(latitude, longitude, entryId)
     }
 }

@@ -4,10 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.avoided_race_app.db.ScoreEntry
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,7 +20,11 @@ import org.osmdroid.views.overlay.Marker
 class ScoreMapFragment : Fragment() {
 
     private lateinit var mapView: MapView
+    private lateinit var updateButton: MaterialButton
+
     private var allEntries: List<ScoreEntry> = emptyList()
+    private var selectedEntryId: Int = -1
+    private var currentMarker: Marker? = null
 
     private val DEFAULT_CENTER = GeoPoint(32.0853, 34.7818)
     private val DEFAULT_ZOOM = 10.0
@@ -32,12 +37,20 @@ class ScoreMapFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         mapView = view.findViewById(R.id.score_MAP)
+        updateButton = view.findViewById(R.id.map_BTN_update)
+
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
         mapView.controller.setZoom(DEFAULT_ZOOM)
         mapView.controller.setCenter(DEFAULT_CENTER)
 
-        loadAndPinAllScores()
+        updateButton.setOnClickListener { saveUpdatedLocation() }
+
+        // Load entries for label lookups
+        lifecycleScope.launch(Dispatchers.IO) {
+            allEntries = (requireActivity().application as GameApplication)
+                .database.scoreDao().getTop10()
+        }
     }
 
     override fun onResume() {
@@ -50,59 +63,45 @@ class ScoreMapFragment : Fragment() {
         mapView.onPause()
     }
 
-    private fun loadAndPinAllScores() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val scores = (requireActivity().application as GameApplication)
-                .database.scoreDao().getTop10()
-            withContext(Dispatchers.Main) {
-                allEntries = scores
-                pinAllScores(highlightedEntry = null)
-            }
-        }
-    }
+    fun centerOn(latitude: Double, longitude: Double, entryId: Int) {
+        selectedEntryId = entryId
+        val geoPoint = GeoPoint(latitude, longitude)
 
-    private fun pinAllScores(highlightedEntry: ScoreEntry?) {
         mapView.overlays.clear()
 
-        val validEntries = allEntries.filter { it.latitude != 0.0 || it.longitude != 0.0 }
+        val marker = Marker(mapView)
+        marker.position = geoPoint
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        marker.title = allEntries.find { it.id == entryId }?.score?.let { "Score: $it" } ?: "Score"
+        marker.isDraggable = true
+        currentMarker = marker
+        mapView.overlays.add(marker)
 
-        if (validEntries.isEmpty()) {
-            mapView.controller.setCenter(DEFAULT_CENTER)
-            mapView.controller.setZoom(DEFAULT_ZOOM)
-            mapView.invalidate()
-            return
-        }
-
-        validEntries.forEach { entry ->
-            val marker = Marker(mapView)
-            marker.position = GeoPoint(entry.latitude, entry.longitude)
-            marker.title = "Score: ${entry.score}"
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-            if (entry == highlightedEntry) {
-                marker.icon = ContextCompat.getDrawable(
-                    requireContext(), org.osmdroid.library.R.drawable.marker_default
-                )?.mutate()?.also { it.setTint(0xFFFFD700.toInt()) }
-            }
-
-            mapView.overlays.add(marker)
-        }
-
-        if (highlightedEntry == null && validEntries.isNotEmpty()) {
-            val top = validEntries.first()
-            mapView.controller.animateTo(GeoPoint(top.latitude, top.longitude))
-            mapView.controller.setZoom(12.0)
-        }
-
+        mapView.controller.animateTo(geoPoint)
+        mapView.controller.setZoom(14.0)
         mapView.invalidate()
+
+        updateButton.visibility = View.VISIBLE
     }
 
-    fun centerOn(latitude: Double, longitude: Double) {
-        val target = GeoPoint(latitude, longitude)
-        mapView.controller.animateTo(target)
-        mapView.controller.setZoom(14.0)
+    private fun saveUpdatedLocation() {
+        val marker = currentMarker ?: return
+        val entryId = selectedEntryId.takeIf { it != -1 } ?: return
 
-        val selected = allEntries.find { it.latitude == latitude && it.longitude == longitude }
-        pinAllScores(highlightedEntry = selected)
+        val newLat = marker.position.latitude
+        val newLng = marker.position.longitude
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            (requireActivity().application as GameApplication)
+                .database.scoreDao().updateLocation(entryId, newLat, newLng)
+
+            // Refresh local cache so subsequent row taps use the updated coordinates
+            allEntries = (requireActivity().application as GameApplication)
+                .database.scoreDao().getTop10()
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Location updated", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@ class ScoreTableFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = ScoreTableAdapter(emptyList()) { entry ->
-            listener?.onScoreSelected(entry.latitude, entry.longitude)
+            listener?.onScoreSelected(entry.id, entry.latitude, entry.longitude)
         }
         recyclerView.adapter = adapter
 

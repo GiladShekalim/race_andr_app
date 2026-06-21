@@ -65,6 +65,19 @@
             android:layout_weight="1" />
     </LinearLayout>
 
+    <!-- Back button overlay (top-left) -->
+    <ImageButton
+        android:id="@+id/main_BTN_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_arrow_back" />
+
     <!-- Hearts (Lives) -->
     <LinearLayout
         android:id="@+id/main_LAY_hearts"

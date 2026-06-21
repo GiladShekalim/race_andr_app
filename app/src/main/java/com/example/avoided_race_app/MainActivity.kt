@@ -20,7 +20,6 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.avoided_race_app.db.ScoreEntry
@@ -94,7 +93,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastKnownLocation: Location? = null
     private lateinit var locationCallback: LocationCallback
-    private val LOCATION_PERMISSION_REQUEST = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,10 +132,11 @@ class MainActivity : AppCompatActivity() {
         if (pace == GameSettings.PACE_FASTENING) startRamp()
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        requestLocationPermission()
+        startLocationUpdates()
     }
 
     private fun findViews() {
+        findViewById<android.widget.ImageButton>(R.id.main_BTN_back).setOnClickListener { finish() }
         main_BTN_left = findViewById(R.id.main_BTN_left)
         main_BTN_right = findViewById(R.id.main_BTN_right)
 
@@ -256,41 +255,25 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed({ finish() }, 1500)
     }
 
-    private fun requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            startLocationUpdates()
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST &&
-            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startLocationUpdates()
-        }
-    }
-
     private fun startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) return
 
+        // Seed immediately with the device's last cached fix so short games still get a location
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) lastKnownLocation = location
+        }
+
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
-                lastKnownLocation = result.lastLocation
+                // lastLocation is nullable on API 31+ — use locations list as primary source
+                lastKnownLocation = result.locations.lastOrNull() ?: result.lastLocation
+                    ?: lastKnownLocation
             }
         }
 
         val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY, 5000L
+            Priority.PRIORITY_HIGH_ACCURACY, 2000L
         ).build()
 
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)

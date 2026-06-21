@@ -11,4 +11,7 @@ interface ScoreDao {
 
     @Query("SELECT * FROM scores ORDER BY score DESC LIMIT 10")
     fun getTop10(): List<ScoreEntry>
+
+    @Query("UPDATE scores SET latitude = :lat, longitude = :lng WHERE id = :id")
+    fun updateLocation(id: Int, lat: Double, lng: Double)
 }

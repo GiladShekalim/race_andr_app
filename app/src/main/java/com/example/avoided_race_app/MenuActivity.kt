@@ -1,9 +1,13 @@
 package com.example.avoided_race_app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class MenuActivity : AppCompatActivity() {
@@ -12,6 +16,8 @@ class MenuActivity : AppCompatActivity() {
     private lateinit var menu_RG_pace: RadioGroup
     private lateinit var menu_BTN_start: ExtendedFloatingActionButton
     private lateinit var menu_BTN_scoreboard: ExtendedFloatingActionButton
+
+    private val LOCATION_PERMISSION_REQUEST = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,10 +29,22 @@ class MenuActivity : AppCompatActivity() {
         menu_BTN_scoreboard = findViewById(R.id.menu_BTN_scoreboard)
 
         loadSettings()
+        requestLocationPermission()
 
         menu_BTN_start.setOnClickListener { startGame() }
         menu_BTN_scoreboard.setOnClickListener {
             startActivity(Intent(this, ScoreboardActivity::class.java))
+        }
+    }
+
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST
+            )
         }
     }
 
