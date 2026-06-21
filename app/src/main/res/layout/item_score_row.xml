@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp"
+    android:background="?attr/selectableItemBackground">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/row_LBL_rank"
+        android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@android:color/white" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/row_LBL_score"
+        android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:textColor="#FFD700"
+        android:textStyle="bold" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/row_LBL_date"
+        android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp" />
+</LinearLayout>
